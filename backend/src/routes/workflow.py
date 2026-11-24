@@ -4,8 +4,9 @@ from sqlalchemy import text
 from src.config.settings import cache, engine
 from src.controllers.workflow import download
 from src.models.tables import audit, cases, evidence, runs
-from src.schemas.workflow import CaseForm, LoginForm, ReviewForm
-from src.services import domain, workflow
+from src.schemas.workflow import (CaseForm, LoginForm, RenumberForm, ReviewForm,
+                                  SlipForm)
+from src.services import domain, renumber, workflow
 from src.services.security import current_user, login, operator, reviewer
 
 router = APIRouter()
@@ -67,3 +68,33 @@ def review_evidence(identity: int, form: ReviewForm, actor=Depends(reviewer)):
 @router.get('/audit')
 def list_audit(_=Depends(current_user)):
     return workflow.recent(audit)
+
+
+@router.get('/catalog')
+def show_catalog(_=Depends(current_user)):
+    return renumber.catalog()
+
+
+@router.get('/catalog/orders')
+def list_renumber_orders(_=Depends(current_user)):
+    return renumber.orders()
+
+
+@router.post('/catalog/renumber', status_code=201)
+def submit_renumber(form: RenumberForm, actor=Depends(operator)):
+    return renumber.submit(form.base_version, form.items, actor)
+
+
+@router.get('/borrow/slips')
+def list_borrow_slips(_=Depends(current_user)):
+    return renumber.slips()
+
+
+@router.post('/borrow/slips', status_code=201)
+def create_borrow_slip(form: SlipForm, actor=Depends(operator)):
+    return renumber.make_slip(form.range_start, form.range_end, actor)
+
+
+@router.get('/borrow/slips/{identity}')
+def show_borrow_slip(identity: int, _=Depends(current_user)):
+    return renumber.slip_detail(identity)

@@ -38,3 +38,33 @@ audit = Table('audit_events', schema,
     Column('action', String(32), nullable=False),
     Column('reference', String(50), nullable=False),
     Column('created_at', String(32), nullable=False))
+catalog_state = Table('catalog_state', schema,
+    Column('id', Integer, primary_key=True),
+    Column('version', Integer, nullable=False))
+catalog_scores = Table('catalog_scores', schema,
+    Column('id', Integer, primary_key=True),
+    Column('number', Integer, nullable=False, unique=True),
+    Column('title', String(120), nullable=False),
+    Column('available_copies', Integer, nullable=False))
+renumber_orders = Table('renumber_orders', schema,
+    Column('id', Integer, primary_key=True),
+    Column('base_version', Integer, nullable=False),
+    Column('result_version', Integer),
+    Column('status', String(20), nullable=False, index=True),
+    Column('reason', String(500)),
+    Column('items', JSON, nullable=False),
+    Column('actor', String(40), nullable=False),
+    Column('created_at', String(32), nullable=False))
+number_aliases = Table('number_aliases', schema,
+    Column('id', Integer, primary_key=True),
+    Column('score_id', ForeignKey('catalog_scores.id'), nullable=False, index=True),
+    Column('number', Integer, nullable=False, index=True),
+    Column('from_version', Integer, nullable=False),
+    Column('to_version', Integer))
+borrow_slips = Table('borrow_slips', schema,
+    Column('id', Integer, primary_key=True),
+    Column('range_start', Integer, nullable=False),
+    Column('range_end', Integer, nullable=False),
+    Column('catalog_version', Integer, nullable=False),
+    Column('actor', String(40), nullable=False),
+    Column('created_at', String(32), nullable=False))
